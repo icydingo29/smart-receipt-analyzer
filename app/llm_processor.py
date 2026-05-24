@@ -51,6 +51,8 @@ def enrich_and_categorize(raw_text: str) -> str:
    - issuer_id (vendor tax ID or registration number, if visible)
    - receiver_name (customer name, if visible)
    - receiver_id (customer ID, if visible)
+   - total amount (amount of money spent)
+   - currency (in three letter format, for example 'USD')
 
 4. ENSURE all line items have:
    - description (product/service name)

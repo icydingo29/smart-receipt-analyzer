@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import List, Optional
 from datetime import datetime
 
-
+# Rows in databases schemas
 class LineItemSchema(BaseModel):
     """Schema for individual line items on an invoice."""
     
@@ -81,7 +81,7 @@ class InvoiceSchema(BaseModel):
     class Config:
         strict = True
 
-
+# Adding invoice to database schema
 class ReceiptCreateSchema(BaseModel):
     """Schema for creating a receipt in the database."""
     
@@ -96,7 +96,7 @@ class ReceiptCreateSchema(BaseModel):
     raw_llm_response: str
     parsed_result: dict  # The full InvoiceSchema.model_dump()
 
-
+# API response schemas
 class LineItemResponseSchema(BaseModel):
     """Schema for line item in API responses."""
     
@@ -139,6 +139,7 @@ class ReceiptDetailedResponseSchema(ReceiptResponseSchema):
     parsed_result: dict
 
 
+# Successful/failed upload response schemas
 class UploadReceiptResponse(BaseModel):
     """Response schema for successful file upload."""
     

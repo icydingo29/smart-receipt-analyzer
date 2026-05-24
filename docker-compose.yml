@@ -33,7 +33,6 @@ services:
       DEBUG: "false"
     ports:
       - "8000:8000"
-      - "8501:8501"
     volumes:
       - ./app:/app/app
       - ./storage_volume:/app/storage_volume
@@ -44,6 +43,26 @@ services:
     networks:
       - receipt-analyzer-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: receipt-analyzer-ui
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/receipt_analyzer
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      API_URL: http://app:8000
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./app:/app/app
+      - ./storage_volume:/app/storage_volume
+    depends_on:
+      - app
+    networks:
+      - receipt-analyzer-network
+    command: streamlit run app/ui.py --server.port=8501 --server.address=0.0.0.0 --logger.level=debug
 
 volumes:
   postgres_data:

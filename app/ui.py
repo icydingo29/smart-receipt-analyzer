@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional
 import json
+import os
 
 # Configure Streamlit
 st.set_page_config(
@@ -14,8 +15,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# API configuration
-API_URL = "http://localhost:8000"
+# API configuration - use service name in Docker, localhost for development
+API_URL = os.getenv("API_URL", "http://app:8000")
 
 def check_api_health() -> bool:
     """Check if FastAPI backend is available."""

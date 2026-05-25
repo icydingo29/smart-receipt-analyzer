@@ -116,13 +116,13 @@ def extract_text_vision(pdf_path: str) -> str:
         raise
 
 
-def extract_text(pdf_path: str, use_vision: bool = False) -> str:
+def extract_text(pdf_path: str, skip_local: bool = False) -> str:
     """
-    Main extraction orchestrator. Tries local method first, falls back to Vision API if needed.
+    Main extraction orchestrator. Uses Vision API by default, optionally falls back to pdfplumber.
     
     Args:
         pdf_path: Path to the PDF file
-        use_vision: Force use of Vision API even if local extraction succeeds
+        skip_local: If True, skip pdfplumber fallback and use only Vision API (default: False)
         
     Returns:
         Extracted text string
@@ -137,17 +137,27 @@ def extract_text(pdf_path: str, use_vision: bool = False) -> str:
     
     logger.info(f"Starting text extraction from {pdf_path}")
     
-    # Try local extraction first if not forcing vision
-    if not use_vision:
-        local_text = extract_text_local(pdf_path)
-        if local_text.strip():
-            return local_text
-        logger.info("Local extraction returned empty text, falling back to Vision API")
-    
-    # Fall back to or use Vision API
+    # Try Vision API first (primary method)
     try:
         vision_text = extract_text_vision(pdf_path)
-        return vision_text
+        if vision_text.strip():
+            logger.info("Vision API extraction successful")
+            return vision_text
+        logger.warning("Vision API returned empty text")
     except Exception as e:
-        logger.error(f"All extraction methods failed: {e}")
-        raise RuntimeError(f"Failed to extract text from PDF: {e}")
+        logger.warning(f"Vision API extraction failed: {e}")
+    
+    # Fallback to pdfplumber if Vision fails (unless skipped)
+    if not skip_local:
+        logger.info("Falling back to pdfplumber extraction")
+        try:
+            local_text = extract_text_local(pdf_path)
+            if local_text.strip():
+                logger.info("pdfplumber extraction successful")
+                return local_text
+        except Exception as e:
+            logger.warning(f"pdfplumber fallback also failed: {e}")
+    
+    # If both methods failed, raise error
+    logger.error("All extraction methods failed")
+    raise RuntimeError(f"Failed to extract text from PDF: {pdf_path}")

@@ -31,18 +31,19 @@ def enrich_and_categorize(raw_text: str) -> str:
     
     system_prompt = """You are an expert receipt analyzer. Your task is to parse raw OCR text from invoices and:
 
-1. IDENTIFY and CORRECT any OCR errors in item names and descriptions
-2. CATEGORIZE each line item into a spending category such as:
-   - Dairy (milk, cheese, yogurt, etc.)
-   - Bakery (bread, pastries, cakes, etc.)
-   - Beverages (juice, coffee, tea, water, etc.)
-   - Meat (chicken, beef, pork, fish, etc.)
-   - Household (soap, cleaning supplies, paper products, etc.)
-   - Electronics (gadgets, batteries, cables, etc.)
-   - Clothing (apparel, shoes, accessories, etc.)
-   - Books (educational materials, magazines, etc.)
-   - Pharmacy (medicines, health products, etc.)
-   - Other (miscellaneous items)
+1. IDENTIFY and CORRECT any OCR translation errors in item names and descriptions. Resolve abbreviations using contextual awareness (e.g., "CHX" to "Chicken", "MB pro" to "MacBook Pro", "OFF SPLY" to "Office Supplies").
+2. CATEGORIZE each line item into exactly one of the following standard business expense categories:
+   - Food & Beverages (Groceries, catering, restaurant meals, team coffee, food consumables)
+   - Office Supplies & Equipment (Paper, pens, stationary, desks, chairs, non-IT storage)
+   - Technology & Software (Computers, software licenses, SaaS subscriptions, cloud hosting, cables, IT services)
+   - Travel & Transportation (Flights, hotels, taxi fares, fuel, vehicle rentals, public transit, parking)
+   - Utilities & Facilities (Electricity, water, internet bills, office rent, facility maintenance)
+   - Logistics & Shipping (Postage, freight costs, courier fees, shipping boxes, packaging materials)
+   - Professional Services (Consulting fees, legal retainers, outsourced accounting, corporate training, books)
+   - Healthcare & Safety (Medical supplies, pharmacy purchases, first aid kits, protective equipment)
+   - Apparel & Uniforms (Corporate wear, branded apparel, protective shoes, worker gear)
+   - Maintenance & Operations (Hardware tools, machinery repair items, raw materials, manufacturing inventory)
+   - Miscellaneous / Other (Rare items that completely defy classification within the domains above)
 
 3. EXTRACT structured fields:
    - invoice_number (vendor's invoice/receipt ID)

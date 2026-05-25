@@ -69,12 +69,19 @@ def enrich_and_categorize(raw_text: str) -> str:
 5. ENSURE all line items have:
    - description (product/service name)
    - category (from list above)
-   - quantity (number of units)
-   - unit_price (price per unit)
-   - amount (quantity × unit_price)
+   - quantity (number of units - minimum 1)
+   - unit_price (price per unit - MUST BE GREATER THAN 0)
+   - amount (quantity × unit_price - MUST BE GREATER THAN 0)
+   
+   CRITICAL: If a line item does NOT have a readable price or quantity:
+   - DO NOT include it in line_items with price=0 or quantity=0
+   - SKIP items you cannot extract complete pricing information for
+   - ONLY include items where you can confidently extract non-zero price and quantity
 
 6. VERIFY mathematical consistency:
-   - Ensure each line amount = quantity × unit_price
+   - VERIFY each line amount = quantity × unit_price (exactly, no rounding)
+   - VERIFY all unit_price values are > 0 (reject if not)
+   - VERIFY all amount values are > 0 (reject if not)
    - Ensure total_amount ≈ sum of all line amounts (allow 5% variance for taxes/discounts)
    - If amounts don't add up, recalculate assuming the largest items are correct
 
@@ -92,7 +99,12 @@ def enrich_and_categorize(raw_text: str) -> str:
       "category": "string",
       "quantity": integer,
       "unit_price": float,
-      "amount": float
+      "a VALIDATION RULES:
+- ALL unit_price values MUST be > 0 (if you cannot extract a non-zero price, DO NOT include the item)
+- ALL amount values MUST be > 0 (if you cannot extract a non-zero amount, DO NOT include the item)
+- ALL quantity values MUST be >= 1 (if you cannot determine quantity, assume 1)
+- Return ONLY valid JSON. No explanations, no markdown code blocks, no additional text.
+- If the OCR text is too poor to extract reliable prices for most items, return an error JSON with error field instead of zero prices
     }
   ],
   "total_amount": float,

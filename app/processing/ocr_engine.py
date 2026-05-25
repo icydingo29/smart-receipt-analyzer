@@ -39,7 +39,7 @@ def extract_text_local(pdf_path: str) -> str:
 
 def extract_text_vision(pdf_path: str) -> str:
     """
-    Extract text from PDF using Groq Vision API (llama-3.2-11b-vision-preview).
+    Extract text from PDF using Groq Vision API (meta-llama/llama-4-scout-17b-16e-instruct).
     Handles image-only PDFs and complex layouts.
     
     Args:
@@ -81,7 +81,7 @@ def extract_text_vision(pdf_path: str) -> str:
             
             # Call Groq Vision API
             response = client.chat.completions.create(
-                model="llama-3.2-11b-vision-preview",
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[
                     {
                         "role": "user",

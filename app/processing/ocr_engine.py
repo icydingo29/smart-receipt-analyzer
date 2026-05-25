@@ -6,7 +6,7 @@ from typing import Optional
 import pdfplumber
 from pdf2image import convert_from_path
 from groq import Groq
-from app.config import settings
+from app.foundation.config import settings
 
 logger = logging.getLogger(__name__)
 

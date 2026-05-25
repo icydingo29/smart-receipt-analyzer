@@ -42,7 +42,7 @@ services:
         condition: service_healthy
     networks:
       - receipt-analyzer-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --reload
 
   streamlit:
     build:
@@ -62,7 +62,7 @@ services:
       - app
     networks:
       - receipt-analyzer-network
-    command: streamlit run app/ui.py --server.port=8501 --server.address=0.0.0.0 --logger.level=debug
+    command: streamlit run app/ui_layer/ui.py --server.port=8501 --server.address=0.0.0.0 --logger.level=debug
 
 volumes:
   postgres_data:

@@ -9,8 +9,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from app.schemas import InvoiceSchema
-from app.config import settings
+from app.data.schemas import InvoiceSchema
+from app.foundation.config import settings
 
 logger = logging.getLogger(__name__)
 

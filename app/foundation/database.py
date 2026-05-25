@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from contextlib import contextmanager
-from app.config import settings
+from app.foundation.config import settings
 
 # Create database engine
 engine = create_engine(

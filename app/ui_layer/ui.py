@@ -33,10 +33,14 @@ def upload_receipt(pdf_file) -> Optional[dict]:
         files = {"file": (pdf_file.name, pdf_file, "application/pdf")}
         response = requests.post(f"{API_URL}/api/receipts", files=files, timeout=120)
         
-        if response.status_code == 201:
+        if response.status_code == 200:
             return response.json()
         else:
-            st.error(f"Upload failed: {response.json().get('detail', 'Unknown error')}")
+            try:
+                error_detail = response.json().get('detail', 'Unknown error')
+            except:
+                error_detail = f"HTTP {response.status_code}: {response.text}"
+            st.error(f"Upload failed: {error_detail}")
             return None
     except Exception as e:
         st.error(f"Error uploading file: {str(e)}")
@@ -144,7 +148,8 @@ with tab1:
                                 data=pdf_data,
                                 file_name=f"expense_report_{result['receipt_id']}.pdf",
                                 mime="application/pdf",
-                                use_container_width=True
+                                use_container_width=True,
+                                key=f"download_upload_{result['receipt_id']}"
                             )
                         
                         # Store receipt ID in session for viewing
@@ -245,6 +250,7 @@ with tab2:
                             data=pdf_data,
                             file_name=f"expense_report_{receipt_id}.pdf",
                             mime="application/pdf",
+                            key=f"download_view_{receipt_id}",
                             use_container_width=True
                         )
     else:

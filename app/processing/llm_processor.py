@@ -3,8 +3,8 @@ import json
 import logging
 from typing import Tuple
 from groq import Groq
-from app.config import settings
-from app.schemas import InvoiceSchema
+from app.foundation.config import settings
+from app.data.schemas import InvoiceSchema
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +53,10 @@ def enrich_and_categorize(raw_text: str) -> str:
    - For grocery stores: Dairy, Bakery, Beverages, Meat, Produce, Household, etc.
    - For restaurants: Appetizers, Main Course, Dessert, Beverages (Alcoholic), Beverages (Non-Alcoholic), etc.
    - For pharmacies: Medications, Health Products, Personal Care, Supplements, etc.
-   - For other vendors: Adapt categories to the vendor's business type so that items that are similar to each other are in the same category
+   - For other vendors: Adapt categories to the vendor's business type so that items that are similar to each other are in the same category. If too many items are in the same category, consider splitting the category into smaller, more specific categories.
    - Use "Other" only for truly miscellaneous items that don't fit the vendor context. Before putting an item into "Other", consider whether there are other similar items in the invoice. If there are, consider making a category that summarizes the similar items. Use made category for othe other similar items also.
 
-3. EXTRACT structured fields:
+4. EXTRACT structured fields:
    - invoice_number (vendor's invoice/receipt ID)
    - invoice_date (transaction date in YYYY-MM-DD format)
    - issuer_name (vendor/store name - REQUIRED)
@@ -66,19 +66,19 @@ def enrich_and_categorize(raw_text: str) -> str:
    - total amount (amount of money spent)
    - currency (in three letter format, for example 'USD')
 
-4. ENSURE all line items have:
+5. ENSURE all line items have:
    - description (product/service name)
    - category (from list above)
    - quantity (number of units)
    - unit_price (price per unit)
    - amount (quantity × unit_price)
 
-5. VERIFY mathematical consistency:
+6. VERIFY mathematical consistency:
    - Ensure each line amount = quantity × unit_price
    - Ensure total_amount ≈ sum of all line amounts (allow 5% variance for taxes/discounts)
    - If amounts don't add up, recalculate assuming the largest items are correct
 
-6. RETURN ONLY valid JSON matching this exact structure:
+7. RETURN ONLY valid JSON matching this exact structure:
 {
   "invoice_number": "string",
   "invoice_date": "YYYY-MM-DD",

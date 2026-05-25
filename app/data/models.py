@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, Float, DateTime, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime, timezone
-from app.database import Base
+from app.foundation.database import Base
 
 
 class Receipt(Base):

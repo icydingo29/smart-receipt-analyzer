@@ -1,4 +1,4 @@
-"""FastAPI application with REST API endpoints for receipt processing."""
+"""API layer: FastAPI application and REST endpoints."""
 import logging
 import os
 from pathlib import Path
@@ -10,20 +10,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from app.config import settings
-from app.database import SessionLocal, init_db, get_db
-from app.models import Receipt, LineItem
-from app.schemas import (
-    InvoiceSchema,
-    ReceiptCreateSchema,
-    ReceiptResponseSchema,
-    LineItemResponseSchema,
-    UploadReceiptResponse,
-    ErrorResponse
-)
-from app.ocr_engine import extract_text
-from app.llm_processor import enrich_and_categorize, validate_and_parse
-from app.pdf_generator import generate_report_pdf
+from app.foundation import settings, init_db, get_db
+from app.data import Receipt, LineItem, InvoiceSchema, ReceiptResponseSchema, UploadReceiptResponse, ErrorResponse
+from app.processing import extract_text, enrich_and_categorize, validate_and_parse, generate_report_pdf
 
 # Configure logging
 logging.basicConfig(

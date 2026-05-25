@@ -123,7 +123,7 @@ Return only valid JSON matching the required schema."""
         logger.info("Calling Groq LLM for enrichment and categorization")
         
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.llm_model,
             messages=[
                 {
                     "role": "system",

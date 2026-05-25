@@ -4,13 +4,17 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+    """Application settings loaded from environment variables. Default values given."""
     
     # Database Configuration
     database_url: str = "postgresql://postgres:postgres@localhost:5432/receipt_analyzer"
     
     # Groq API Configuration
     groq_api_key: str = ""
+    
+    # LLM Model Configuration
+    ocr_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    llm_model: str = "llama-3.3-70b-versatile"
     
     # Application Configuration
     app_port: int = 8000

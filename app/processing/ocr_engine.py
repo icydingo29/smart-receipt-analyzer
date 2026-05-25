@@ -81,7 +81,7 @@ def extract_text_vision(pdf_path: str) -> str:
             
             # Call Groq Vision API
             response = client.chat.completions.create(
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                model=settings.ocr_model,
                 messages=[
                     {
                         "role": "user",

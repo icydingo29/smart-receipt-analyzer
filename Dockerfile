@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ app/
 
 # Create necessary directories
-RUN mkdir -p app/storage storage_volume
+RUN mkdir -p data/saved_pdf_files data/temp_pdf_files
 
 # Expose ports
 EXPOSE 8000 8501

@@ -80,9 +80,10 @@ def generate_report_pdf(invoice_schema: InvoiceSchema, receipt_id: int, output_p
         
         # Add header information
         header_data = [
-            ["Vendor:", invoice_schema.issuer_name],
-            ["Date:", invoice_schema.invoice_date or "N/A"],
             ["Invoice #:", invoice_schema.invoice_number or "N/A"],
+            ["Issuer:", invoice_schema.issuer_name],
+            ["Receiver:", invoice_schema.receiver_name],
+            ["Invoice Date:", invoice_schema.invoice_date or "N/A"],
             ["Currency:", invoice_schema.currency],
         ]
         

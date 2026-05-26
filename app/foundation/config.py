@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     debug: bool = False
     
     # Storage Configuration
-    storage_volume_path: str = "./storage_volume"
-    temp_storage_path: str = "./app/storage"
+    saved_pdf_files_path: str = "./data/saved_pdf_files"
+    temp_pdf_files_path: str = "./data/temp_pdf_files"
     
     class Config:
         env_file = ".env"
@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     def __init__(self, **data):
         super().__init__(**data)
         # Create storage directories if they don't exist
-        Path(self.storage_volume_path).mkdir(parents=True, exist_ok=True)
-        Path(self.temp_storage_path).mkdir(parents=True, exist_ok=True)
+        Path(self.saved_pdf_files_path).mkdir(parents=True, exist_ok=True)
+        Path(self.temp_pdf_files_path).mkdir(parents=True, exist_ok=True)
 
 
 # Create global settings instance

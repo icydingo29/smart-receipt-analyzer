@@ -83,7 +83,7 @@ async def upload_receipt(
             )
         
         # Save uploaded file temporarily
-        temp_file_path = Path(settings.temp_storage_path) / file.filename
+        temp_file_path = Path(settings.temp_pdf_files_path) / file.filename
         logger.info(f"Saving uploaded file: {temp_file_path}")
         
         contents = await file.read()
@@ -128,7 +128,8 @@ async def upload_receipt(
         )
         
         db.add(receipt)
-        db.flush()  # Get the receipt ID without committing
+        db.flush()  
+        # Get the receipt ID without committing
         receipt_id = receipt.id
         logger.info(f"Receipt created with ID: {receipt_id}")
         
@@ -147,12 +148,12 @@ async def upload_receipt(
         db.flush()  # Flush line items
         logger.info(f"Added {len(invoice_schema.line_items)} line items")
         
-        # STEP 5: Generate PDF report
+        # STEP 5: Generate PDF report path
         logger.info("Step 5: PDF report generation")
         pdf_path = generate_report_pdf(
             invoice_schema,
             receipt_id,
-            settings.storage_volume_path
+            settings.saved_pdf_files_path
         )
         
         # STEP 6: Update receipt with PDF path and commit

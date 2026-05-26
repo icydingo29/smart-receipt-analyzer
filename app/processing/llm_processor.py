@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def enrich_and_categorize(raw_text: str) -> str:
     """
     Send extracted text to Groq LLM for enrichment and categorization.
-    Uses llama-3.3-70b-versatile with JSON mode for structured output.
+    Uses llama-3.3-70b-versatile by default with JSON mode for structured output.
     
     Args:
         raw_text: Raw unstructured text from OCR
@@ -29,63 +29,54 @@ def enrich_and_categorize(raw_text: str) -> str:
     
     client = Groq(api_key=settings.groq_api_key)
     
-    system_prompt = """You are an expert receipt analyzer. Your task is to parse raw OCR text from invoices and:
+    system_prompt = """You are an expert receipt analyzer. Your task is to parse raw OCR text from invoices and return a strict, validated JSON result.
 
-1. IDENTIFY and CORRECT any OCR errors in item names and descriptions
+1. IDENTIFY and CORRECT OCR ERRORS:
+    - Correct obvious OCR mistakes in product names, numbers, and dates.
 
-2. ANALYZE INVOICE CONTEXT:
-   - Determine the vendor type (e.g., grocery store, restaurant, pharmacy, clothing store, etc.)
-   - Consider what types of items are typically sold at this vendor
-   - Use this context to intelligently categorize items
-   
-   EXAMPLE: For a steakhouse invoice:
-   - Beer → Beverages (alcoholic drinks at restaurant)
-   - Ribeye Steak → Food/Main Course (core restaurant offering)
-   - Dessert/Ice Cream → Dessert (not general Bakery)
-   
-   EXAMPLE: For a supermarket invoice:
-   - Milk → Dairy (dairy section items)
-   - Whole Wheat Bread → Bakery (bread aisle)
-   - Dish Soap → Household (cleaning supplies)
-   
-3. CATEGORIZE each line item using CONTEXT-AWARE categories based on the vendor type:
-   - Use specific, contextually relevant categories when appropriate
-   - For grocery stores: Dairy, Bakery, Beverages, Meat, Produce, Household, etc.
-   - For restaurants: Appetizers, Main Course, Dessert, Beverages (Alcoholic), Beverages (Non-Alcoholic), etc.
-   - For pharmacies: Medications, Health Products, Personal Care, Supplements, etc.
-   - For other vendors: Adapt categories to the vendor's business type so that items that are similar to each other are in the same category. If too many items are in the same category, consider splitting the category into smaller, more specific categories.
-   - Use "Other" only for truly miscellaneous items that don't fit the vendor context. Before putting an item into "Other", consider whether there are other similar items in the invoice. If there are, consider making a category that summarizes the similar items. Use made category for othe other similar items also.
+2. CONTEXT-AWARE CATEGORIZATION:
+    - Determine vendor type (e.g., grocery store, restaurant, pharmacy, clothing store, etc.) and use categories appropriate to that vendor.
+    - For grocery stores: use categories like Dairy, Bakery, Beverages, Meat, Produce, Household, etc.
+    - For restaurants: use Appetizers, Main Course, Dessert, Beverages (Alcoholic), Beverages (Non-Alcoholic), etc.
+    - For pharmacies: use Medications, Health Products, Personal Care, Supplements, etc.
+    - For other vendors: adapt categories to the business context and group similar items together.
 
-4. EXTRACT structured fields:
-   - invoice_number (vendor's invoice/receipt ID)
-   - invoice_date (transaction date in YYYY-MM-DD format)
-   - issuer_name (vendor/store name - REQUIRED)
-   - issuer_id (vendor tax ID or registration number, if visible)
-   - receiver_name (customer name, if visible)
-   - receiver_id (customer ID, if visible)
-   - total amount (amount of money spent)
-   - currency (in three letter format, for example 'USD')
+3. DIVERSIFY CATEGORIES (Important):
+    - Do NOT assign the exact same category to more than 60% of distinct line items.
+    - If assigning one category would exceed 60%, you MUST:
+         a) split that category into meaningful subcategories based on item descriptions, OR
+         b) assign more specific categories (e.g., Food → Appetizer/Main Course/Dessert).
 
-5. ENSURE all line items have:
-   - description (product/service name)
-   - category (from list above)
-   - quantity (number of units - minimum 1)
-   - unit_price (price per unit - MUST BE GREATER THAN 0)
-   - amount (quantity × unit_price - MUST BE GREATER THAN 0)
-   
-   CRITICAL: If a line item does NOT have a readable price or quantity:
-   - DO NOT include it in line_items with price=0 or quantity=0
-   - SKIP items you cannot extract complete pricing information for
-   - ONLY include items where you can confidently extract non-zero price and quantity
+4. EXTRACT STRUCTURED FIELDS (required):
+    - invoice_number: string
+    - invoice_date: YYYY-MM-DD
+    - issuer_name: string (REQUIRED)
+    - issuer_id: string or null
+    - receiver_name: string or null
+    - receiver_id: string or null
+    - total_amount: float
+    - currency: 3-letter ISO code (e.g., USD)
 
-6. VERIFY mathematical consistency:
-   - VERIFY each line amount = quantity × unit_price (exactly, no rounding)
-   - VERIFY all unit_price values are > 0 (reject if not)
-   - VERIFY all amount values are > 0 (reject if not)
-   - Ensure total_amount ≈ sum of all line amounts (allow 5% variance for taxes/discounts)
-   - If amounts don't add up, recalculate assuming the largest items are correct
+5. LINE ITEM REQUIREMENTS:
+    - Each line item MUST include:
+         - description: non-empty string
+         - category: non-empty string
+         - quantity: integer (if missing, assume 1)
+         - unit_price: float (MUST be > 0; two decimals)
+         - amount: float (MUST be > 0; amount = quantity × unit_price)
+    - If a line item does NOT have a readable non-zero price or quantity, DO NOT include it in `line_items`.
 
-7. RETURN ONLY valid JSON matching this exact structure:
+6. NUMERIC FORMATTING RULES:
+    - Return `unit_price`, `amount`, and `total_amount` as floats rounded to two decimal places (e.g., 12.34).
+
+7. OCR QUALITY FAILURE:
+    - If the OCR text is too poor to extract reliable prices for the majority of items, return an error JSON object instead of fabricated values:
+      {"error": "ocr_quality", "detail": "brief explanation"}
+
+8. OUTPUT REQUIREMENTS:
+    - Return ONLY valid JSON, matching the exact schema below. No explanatory text, no markdown, no extra fields outside the schema.
+
+Required JSON schema (include these fields exactly):
 {
   "invoice_number": "string",
   "invoice_date": "YYYY-MM-DD",
@@ -99,19 +90,15 @@ def enrich_and_categorize(raw_text: str) -> str:
       "category": "string",
       "quantity": integer,
       "unit_price": float,
-      "a VALIDATION RULES:
-- ALL unit_price values MUST be > 0 (if you cannot extract a non-zero price, DO NOT include the item)
-- ALL amount values MUST be > 0 (if you cannot extract a non-zero amount, DO NOT include the item)
-- ALL quantity values MUST be >= 1 (if you cannot determine quantity, assume 1)
-- Return ONLY valid JSON. No explanations, no markdown code blocks, no additional text.
-- If the OCR text is too poor to extract reliable prices for most items, return an error JSON with error field instead of zero prices
+      "amount": float
     }
   ],
   "total_amount": float,
   "currency": "USD or other ISO code"
 }
 
-CRITICAL: Return ONLY valid JSON. No explanations, no markdown code blocks, no additional text."""
+CRITICAL: Return ONLY valid JSON that strictly follows the schema above. No additional text.
+"""
 
     user_prompt = f"""Parse this raw OCR text from an invoice and extract structured data:
 

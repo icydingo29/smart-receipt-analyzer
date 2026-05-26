@@ -176,7 +176,8 @@ with tab2:
                 "Vendor": receipt["issuer_name"],
                 "Date": receipt["invoice_date"] or "N/A",
                 "Invoice #": receipt["invoice_number"] or "N/A",
-                "Total": f"{receipt['total_amount']:.2f} {receipt['currency']}",
+                "Total": f"{receipt['total_amount']:.2f}",
+                "Currency": f"{receipt['currency']}",
                 "Items": len(receipt["line_items"]),
                 "Processed": receipt["processing_timestamp"][:10]
             })

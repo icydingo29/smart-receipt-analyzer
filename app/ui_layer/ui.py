@@ -173,13 +173,14 @@ with tab2:
         for receipt in receipts:
             table_data.append({
                 "ID": receipt["id"],
-                "Vendor": receipt["issuer_name"],
-                "Date": receipt["invoice_date"] or "N/A",
                 "Invoice #": receipt["invoice_number"] or "N/A",
+                "Issuer": receipt["issuer_name"],
+                "Receiver": receipt["receiver_name"],
                 "Total": f"{receipt['total_amount']:.2f}",
                 "Currency": f"{receipt['currency']}",
                 "Items": len(receipt["line_items"]),
-                "Processed": receipt["processing_timestamp"][:10]
+                "Invoice Date": receipt["invoice_date"] or "N/A",
+                "Date of Processing": receipt["processing_timestamp"][:10]
             })
         
         df = pd.DataFrame(table_data)
@@ -195,18 +196,23 @@ with tab2:
         
         if receipt_id:
             receipt_details = get_receipt_details(receipt_id)
-            
             if receipt_details:
                 # Header information
-                col1, col2, col3, col4 = st.columns(4)
+                col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
                 with col1:
                     st.metric("Invoice #", receipt_details["invoice_number"] or "N/A")
                 with col2:
-                    st.metric("Vendor", receipt_details["issuer_name"])
+                    st.metric("Issuer", receipt_details["issuer_name"])
                 with col3:
-                    st.metric("Date", receipt_details["invoice_date"] or "N/A")
+                    st.metric("Receiver", receipt["receiver_name"])
                 with col4:
-                    st.metric("Total", f"{receipt_details['total_amount']:.2f} {receipt_details['currency']}")
+                    st.metric("Total", f"{receipt_details['total_amount']:.2f}")
+                with col5:
+                    st.metric("Currency", f"{receipt['currency']}")
+                with col6:
+                    st.metric("Invoice Date", receipt_details["invoice_date"] or "N/A")
+                with col7:
+                    st.metric("Date of Processing", receipt["processing_timestamp"][:10])
                 
                 # Line items table
                 st.subheader("Line Items")

@@ -116,7 +116,7 @@ Go to **http://localhost:8501**
 
 ### REST API
 
-Interactive docs available at **http://localhost:8000/docs**
+Interactive docs are available at **http://localhost:8000/docs** (Swagger UI). All endpoints can be tested directly in the browser — no extra tooling needed.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -126,18 +126,18 @@ Interactive docs available at **http://localhost:8000/docs**
 | `GET` | `/api/receipts/{id}` | Get receipt details with line items |
 | `GET` | `/api/receipts/{id}/report` | Download the PDF expense report |
 
-**Example — upload an invoice:**
+**How to use the Swagger UI:**
 
-```bash
-curl -X POST http://localhost:8000/api/receipts \
-  -F "file=@samples/01_florist_shop.pdf"
-```
-
-**Example — download report:**
-
-```bash
-curl http://localhost:8000/api/receipts/1/report --output report.pdf
-```
+1. Open **http://localhost:8000/docs** in your browser
+2. Click on any endpoint row to expand it
+3. Click the **"Try it out"** button on the right
+4. Fill in any required fields:
+   - `GET /health` — no fields required, just click **"Execute"**
+   - `POST /api/receipts` — click **"Choose File"** to select a PDF, then click **"Execute"**
+   - `GET /api/receipts` — enter the number of most recent receipts to skip and maximum receipts to return, then click **"Execute"**
+   - `GET /api/receipts/{id}` — enter the receipt ID in the `id` field, then click **"Execute"**
+   - `GET /api/receipts/{id}/report` — enter the receipt ID in the `id` field, then click **"Execute"**, then click **"Download file"**
+5. The response appears below, including a download link for the PDF report endpoint
 
 ---
 

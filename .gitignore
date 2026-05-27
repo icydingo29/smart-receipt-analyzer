@@ -169,7 +169,7 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-# .vscode/
+.vscode/
 tempCodeRunnerFile.py
 
 # Ruff stuff:

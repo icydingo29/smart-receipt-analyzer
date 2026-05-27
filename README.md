@@ -137,7 +137,7 @@ Interactive docs are available at **http://localhost:8000/docs** (Swagger UI). A
    - `GET /api/receipts` — enter the number of most recent receipts to skip and maximum receipts to return, then click **"Execute"**
    - `GET /api/receipts/{id}` — enter the receipt ID in the `id` field, then click **"Execute"**
    - `GET /api/receipts/{id}/report` — enter the receipt ID in the `id` field, then click **"Execute"**, then click **"Download file"**
-5. The response appears below, including a download link for the PDF report endpoint
+5. The response appears below
 
 ---
 

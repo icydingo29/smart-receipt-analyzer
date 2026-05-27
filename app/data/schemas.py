@@ -1,7 +1,10 @@
 """Pydantic V2 schemas for request/response validation."""
+import logging
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import List, Optional
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 # Rows in databases schemas
 class LineItemSchema(BaseModel):
@@ -31,12 +34,13 @@ class LineItemSchema(BaseModel):
     
     @model_validator(mode='after')
     def validate_amount_consistency(self):
-        """Verify that amount ≈ quantity × unit_price (with 5% tolerance for rounding)."""
         calculated = self.quantity * self.unit_price
         tolerance = abs(calculated * 0.05)
         if abs(self.amount - calculated) > tolerance:
-            # Allow small rounding differences
-            return self
+            logger.warning(
+                "Line item amount mismatch: '%s' has amount=%.2f but qty*unit_price=%.2f (diff=%.2f)",
+                self.description, self.amount, calculated, abs(self.amount - calculated)
+            )
         return self
 
 
@@ -69,13 +73,13 @@ class InvoiceSchema(BaseModel):
     
     @model_validator(mode='after')
     def validate_total_consistency(self):
-        """Verify that total ≈ sum of line items (with 5% tolerance for tax/discounts)."""
         line_total = sum(item.amount for item in self.line_items)
-        tolerance = abs(line_total * 0.05)  # 5% tolerance for taxes/discounts
-        
+        tolerance = abs(line_total * 0.05)
         if abs(self.total_amount - line_total) > tolerance:
-            # Log warning but don't fail - use the provided total
-            return self
+            logger.warning(
+                "Invoice total mismatch: total=%.2f but sum of line items=%.2f (diff=%.2f) — may include tax/discounts",
+                self.total_amount, line_total, abs(self.total_amount - line_total)
+            )
         return self
     
     class Config:

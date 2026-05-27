@@ -152,12 +152,12 @@ async def upload_receipt(
         logger.info("Step 5: PDF report generation")
         pdf_path = generate_report_pdf(
             invoice_schema,
-            receipt_id, 
+            receipt_id, #type:ignore
             settings.saved_pdf_files_path
         )
         
         # STEP 6: Update receipt with PDF path and commit
-        receipt.pdf_report_path = pdf_path
+        receipt.pdf_report_path = pdf_path #type:ignore
         db.commit()
         logger.info(f"Receipt committed to database with PDF: {pdf_path}")
         
@@ -167,7 +167,7 @@ async def upload_receipt(
         
         return UploadReceiptResponse(
             status="success",
-            receipt_id=receipt_id,
+            receipt_id=receipt_id, #type:ignore
             message="Invoice processed successfully",
             invoice_number=invoice_schema.invoice_number or "N/A",
             total_amount=float(invoice_schema.total_amount),

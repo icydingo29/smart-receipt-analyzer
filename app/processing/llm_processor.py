@@ -122,7 +122,7 @@ Return only valid JSON matching the required schema."""
                 }
             ],
             temperature=0.1,  # Low temperature for consistency
-            max_tokens=2048,
+            max_tokens=4096,
             response_format={"type": "json_object"}
         )
         
@@ -158,6 +158,12 @@ def validate_and_parse(raw_llm_response: str) -> Tuple[str, InvoiceSchema]:
             logger.error(f"Failed to parse JSON from LLM response: {e}")
             raise ValueError(f"Invalid JSON from LLM: {e}")
         
+        # Check for OCR quality failure reported by the LLM
+        if "error" in json_data:
+            detail = json_data.get("detail", "OCR quality too poor to extract reliable data")
+            logger.error(f"LLM reported OCR quality failure: {detail}")
+            raise ValueError(f"OCR quality error: {detail}")
+
         # Validate with Pydantic schema
         try:
             invoice_schema = InvoiceSchema.model_validate(json_data)

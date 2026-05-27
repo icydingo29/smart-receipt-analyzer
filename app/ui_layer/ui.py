@@ -204,15 +204,15 @@ with tab2:
                 with col2:
                     st.metric("Issuer", receipt_details["issuer_name"])
                 with col3:
-                    st.metric("Receiver", receipt["receiver_name"])
+                    st.metric("Receiver", receipt_details["receiver_name"])
                 with col4:
                     st.metric("Total", f"{receipt_details['total_amount']:.2f}")
                 with col5:
-                    st.metric("Currency", f"{receipt['currency']}")
+                    st.metric("Currency", f"{receipt_details['currency']}")
                 with col6:
                     st.metric("Invoice Date", receipt_details["invoice_date"] or "N/A")
                 with col7:
-                    st.metric("Date of Processing", receipt["processing_timestamp"][:10])
+                    st.metric("Date of Processing", receipt_details["processing_timestamp"][:10])
                 
                 # Line items table
                 st.subheader("Line Items")

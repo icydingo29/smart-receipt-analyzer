@@ -76,7 +76,7 @@ async def upload_receipt(
     
     try:
         # Validate file type
-        if not file.filename.lower().endswith('.pdf'):
+        if not file.filename or not file.filename.lower().endswith('.pdf'):
             raise HTTPException(
                 status_code=400,
                 detail="File must be a PDF. Please upload a .pdf file."
@@ -147,12 +147,12 @@ async def upload_receipt(
         
         db.flush()  # Flush line items
         logger.info(f"Added {len(invoice_schema.line_items)} line items")
-        
-        # STEP 5: Generate PDF report path
+
+        # STEP 5: Generate PDF report
         logger.info("Step 5: PDF report generation")
         pdf_path = generate_report_pdf(
             invoice_schema,
-            receipt_id,
+            receipt_id, 
             settings.saved_pdf_files_path
         )
         
@@ -294,7 +294,9 @@ async def download_report(
         if not receipt:
             raise HTTPException(status_code=404, detail=f"Receipt {receipt_id} not found")
         
-        if not receipt.pdf_report_path or not Path(receipt.pdf_report_path).exists():
+        report_path = str(receipt.pdf_report_path) if receipt.pdf_report_path is not None else None
+
+        if not report_path or not Path(report_path).exists():
             raise HTTPException(
                 status_code=404,
                 detail=f"PDF report not found for receipt {receipt_id}"
@@ -303,7 +305,7 @@ async def download_report(
         logger.info(f"Downloading report for receipt {receipt_id}")
         
         return FileResponse(
-            receipt.pdf_report_path,
+            report_path,
             media_type="application/pdf",
             filename=f"expense_report_{receipt_id}.pdf"
         )

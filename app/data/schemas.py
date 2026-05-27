@@ -49,7 +49,7 @@ class InvoiceSchema(BaseModel):
     issuer_id: Optional[str] = Field(default=None, description="Vendor tax/registration ID")
     receiver_name: Optional[str] = Field(default=None, description="Customer/receiver name")
     receiver_id: Optional[str] = Field(default=None, description="Customer tax/registration ID")
-    line_items: List[LineItemSchema] = Field(..., min_items=1, description="At least 1 line item required")
+    line_items: List[LineItemSchema] = Field(..., min_length=1, description="At least 1 line item required")
     total_amount: float = Field(..., gt=0, description="Grand total amount")
     currency: str = Field(default="USD", min_length=3, max_length=3, description="ISO 4217 currency code")
     
